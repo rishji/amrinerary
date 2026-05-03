@@ -1,0 +1,67 @@
+[
+  {
+    "id": "2026-05-01-sf-ca",
+    "start_date": "2026-05-01",
+    "end_date": "2026-05-07",
+    "location": "SF",
+    "city": "San Francisco",
+    "region": "CA",
+    "country": "USA",
+    "notes": "Friends, dinners, and city time.",
+    "lat": "37.7749",
+    "lng": "-122.4194",
+    "status": "past"
+  },
+  {
+    "id": "2026-05-10-nyc-ny",
+    "start_date": "2026-05-10",
+    "end_date": "2026-05-16",
+    "location": "NYC",
+    "city": "New York",
+    "region": "NY",
+    "country": "USA",
+    "notes": "Work dinners and catching up with friends.",
+    "lat": "40.7128",
+    "lng": "-74.0060",
+    "status": "confirmed"
+  },
+  {
+    "id": "2026-06-01-cdmx",
+    "start_date": "2026-06-01",
+    "end_date": "2026-06-14",
+    "location": "CDMX",
+    "city": "Mexico City",
+    "region": "CDMX",
+    "country": "Mexico",
+    "notes": "Extended stay with museum days and relaxed work rhythm.",
+    "lat": "19.4326",
+    "lng": "-99.1332",
+    "status": "planned"
+  },
+  {
+    "id": "2026-07-01-sicily",
+    "start_date": "2026-07-01",
+    "end_date": "2026-07-10",
+    "location": "Sicily",
+    "city": "Palermo",
+    "region": "Sicily",
+    "country": "Italy",
+    "notes": "Southern coast time and family visits.",
+    "lat": "38.1157",
+    "lng": "13.3615",
+    "status": "planned"
+  },
+  {
+    "id": "2026-08-05-colombia",
+    "start_date": "2026-08-05",
+    "end_date": "2026-08-20",
+    "location": "Colombia",
+    "city": "Medellin",
+    "region": "Antioquia",
+    "country": "Colombia",
+    "notes": "Remote work stretch with flexible side trips.",
+    "lat": "6.2442",
+    "lng": "-75.5812",
+    "status": "tentative"
+  }
+]
