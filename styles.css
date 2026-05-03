@@ -301,12 +301,30 @@ h1 {
   margin-bottom: 20px;
   background:
     linear-gradient(180deg, rgba(255, 255, 255, 0.94), rgba(246, 250, 255, 0.86));
+  overflow-x: auto;
+}
+
+.calendar-weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(140px, 1fr));
+  gap: 12px;
+  margin-bottom: 12px;
+  min-width: 980px;
+}
+
+.calendar-weekday {
+  font-family: "Helvetica Neue", Arial, sans-serif;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-size: 0.72rem;
+  color: var(--muted);
 }
 
 .calendar-days {
   display: grid;
   gap: 12px;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(7, minmax(140px, 1fr));
+  min-width: 980px;
 }
 
 .calendar-day {
@@ -320,6 +338,12 @@ h1 {
 .calendar-day.has-stop {
   background:
     linear-gradient(180deg, rgba(255, 248, 238, 0.98), rgba(237, 246, 255, 0.94));
+}
+
+.calendar-day-empty {
+  min-height: 156px;
+  border-style: dashed;
+  background: rgba(255, 255, 255, 0.32);
 }
 
 .calendar-day-label,
@@ -463,8 +487,7 @@ h1 {
 
 @media (max-width: 900px) {
   .hero-grid,
-  .highlight-panel,
-  .calendar-days {
+  .highlight-panel {
     grid-template-columns: 1fr;
   }
 

@@ -185,10 +185,12 @@ function buildCalendarMonthRange(stops) {
 }
 
 function buildCalendarMonth(month, stops) {
+  const firstDay = new Date(Date.UTC(month.year, month.monthIndex, 1));
   return {
     key: month.key,
     label: month.label,
     isPast: month.stops.length ? month.stops.every((stop) => stop.isPast) : false,
+    leadingEmptySlots: firstDay.getUTCDay(),
     days: buildMonthDays(month),
     featuredStops: stops.filter((stop) => intersectsMonth(stop, month.year, month.monthIndex))
   };

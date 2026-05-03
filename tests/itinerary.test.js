@@ -120,6 +120,7 @@ test("calendar view summarizes stops by month and day ranges", () => {
   const months = buildCalendarMonths(stops);
 
   assert.equal(months.length, 4);
+  assert.equal(months[0].leadingEmptySlots, 5);
   assert.equal(months[0].days[0].isoDate, "2026-05-01");
   assert.equal(months[0].days[0].stops[0].dateLabel, "May 1-7");
   assert.equal(months[0].days[9].stops[0].dateLabel, "May 10-16");

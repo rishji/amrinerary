@@ -216,7 +216,13 @@ function renderCalendar() {
       (month) => `
         <section class="calendar-month ${month.isPast ? "calendar-month-past" : ""}">
           <p class="timeline-month-label">${month.label}</p>
+          <div class="calendar-weekdays">
+            ${["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
+              .map((day) => `<span class="calendar-weekday">${day}</span>`)
+              .join("")}
+          </div>
           <div class="calendar-days">
+            ${Array.from({ length: month.leadingEmptySlots }, () => `<div class="calendar-day calendar-day-empty" aria-hidden="true"></div>`).join("")}
             ${month.days.map(renderCalendarDay).join("")}
           </div>
         </section>
