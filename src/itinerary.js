@@ -84,9 +84,10 @@ export function filterStops(stops, query) {
   return stops.filter((stop) => stop.searchText.includes(normalizedQuery));
 }
 
-export function groupStopsByMonth(stops) {
+export function groupStopsByMonth(stops, options = {}) {
   const groups = [];
   const seen = new Map();
+  const prioritizeUpcoming = options.prioritizeUpcoming ?? false;
 
   for (const stop of stops) {
     const key = `${stop.startDate.getUTCFullYear()}-${stop.startDate.getUTCMonth()}`;
@@ -95,26 +96,34 @@ export function groupStopsByMonth(stops) {
       const group = {
         key,
         label: monthFormatter.format(stop.startDate),
-        stops: []
+        stops: [],
+        isPast: true
       };
       seen.set(key, group);
       groups.push(group);
     }
 
-    seen.get(key).stops.push(stop);
+    const group = seen.get(key);
+    group.stops.push(stop);
+    if (!stop.isPast) {
+      group.isPast = false;
+    }
+  }
+
+  if (prioritizeUpcoming) {
+    return [...groups.filter((group) => !group.isPast), ...groups.filter((group) => group.isPast)];
   }
 
   return groups;
 }
 
 export function buildCalendarMonths(stops) {
-  const months = groupStopsByMonth(stops);
+  if (!stops.length) {
+    return [];
+  }
 
-  return months.map((month) => ({
-    key: month.key,
-    label: month.label,
-    days: buildMonthDays(month)
-  }));
+  const orderedMonths = buildCalendarMonthRange(stops);
+  return orderedMonths.map((month) => buildCalendarMonth(month, stops));
 }
 
 export function getCurrentStop(stops) {
@@ -126,40 +135,85 @@ export function getUpcomingStop(stops) {
 }
 
 function buildMonthDays(month) {
-  const [yearText, monthIndexText] = month.key.split("-");
-  const year = Number(yearText);
-  const monthIndex = Number(monthIndexText);
+  const { year, monthIndex } = month;
   const daysInMonth = new Date(Date.UTC(year, monthIndex + 1, 0)).getUTCDate();
-  const stopMap = new Map(
-    month.stops.map((stop) => [
-      stop.startDateIso,
-      {
-        isoDate: stop.startDateIso,
-        dayNumber: stop.startDate.getUTCDate(),
-        weekday: stop.startDate.toLocaleDateString("en-US", {
-          weekday: "short",
-          timeZone: "UTC"
-        }),
-        stops: [stop]
-      }
-    ])
-  );
 
   return Array.from({ length: daysInMonth }, (_, index) => {
     const day = index + 1;
     const date = new Date(Date.UTC(year, monthIndex, day));
     const isoDate = toIsoDate(date);
+    const stops = month.stops
+      .filter((stop) => stop.startDateIso <= isoDate && stop.endDateIso >= isoDate)
+      .map((stop) => ({
+        ...stop,
+        calendarSpanState: getCalendarSpanState(stop, isoDate)
+      }));
 
-    return (
-      stopMap.get(isoDate) ?? {
-        isoDate,
-        dayNumber: day,
-        weekday: date.toLocaleDateString("en-US", {
-          weekday: "short",
-          timeZone: "UTC"
-        }),
-        stops: []
-      }
-    );
+    return {
+      isoDate,
+      dayNumber: day,
+      weekday: date.toLocaleDateString("en-US", {
+        weekday: "short",
+        timeZone: "UTC"
+      }),
+      stops
+    };
   });
+}
+
+function buildCalendarMonthRange(stops) {
+  const firstMonth = new Date(Date.UTC(stops[0].startDate.getUTCFullYear(), stops[0].startDate.getUTCMonth(), 1));
+  const lastStop = stops.reduce((latest, stop) => (stop.endDate > latest.endDate ? stop : latest), stops[0]);
+  const lastMonth = new Date(Date.UTC(lastStop.endDate.getUTCFullYear(), lastStop.endDate.getUTCMonth(), 1));
+  const months = [];
+
+  for (let cursor = firstMonth; cursor <= lastMonth; cursor = addMonth(cursor)) {
+    const year = cursor.getUTCFullYear();
+    const monthIndex = cursor.getUTCMonth();
+    months.push({
+      key: `${year}-${monthIndex}`,
+      label: monthFormatter.format(cursor),
+      year,
+      monthIndex,
+      stops: stops.filter((stop) => intersectsMonth(stop, year, monthIndex))
+    });
+  }
+
+  return [...months.filter((month) => !month.stops.every((stop) => stop.isPast)), ...months.filter((month) => month.stops.every((stop) => stop.isPast))];
+}
+
+function buildCalendarMonth(month, stops) {
+  return {
+    key: month.key,
+    label: month.label,
+    isPast: month.stops.length ? month.stops.every((stop) => stop.isPast) : false,
+    days: buildMonthDays(month),
+    featuredStops: stops.filter((stop) => intersectsMonth(stop, month.year, month.monthIndex))
+  };
+}
+
+function intersectsMonth(stop, year, monthIndex) {
+  const monthStart = toIsoDate(new Date(Date.UTC(year, monthIndex, 1)));
+  const monthEnd = toIsoDate(new Date(Date.UTC(year, monthIndex + 1, 0)));
+  return stop.startDateIso <= monthEnd && stop.endDateIso >= monthStart;
+}
+
+function addMonth(date) {
+  return new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth() + 1, 1));
+}
+
+function getCalendarSpanState(stop, isoDate) {
+  if (stop.startDateIso === isoDate && stop.endDateIso === isoDate) {
+    return "single";
+  }
+
+  if (stop.startDateIso === isoDate) {
+    return "start";
+  }
+
+  if (stop.endDateIso === isoDate) {
+    return "end";
+  }
+
+  return "middle";
 }

@@ -123,9 +123,33 @@ test("calendar view summarizes stops by month and day ranges", () => {
   assert.equal(months[0].days[9].stops[0].dateLabel, "May 10-16");
 });
 
+test("calendar view spans a stop across every day in its range", () => {
+  const stops = normalizeRows(rawRows, { today: "2026-05-12" });
+  const months = buildCalendarMonths(stops);
+  const may = months[0];
+  const sfSpan = may.days.slice(0, 7);
+
+  assert.equal(sfSpan.every((day) => day.stops.some((stop) => stop.id === "2026-05-01-sf-ca")), true);
+  assert.equal(sfSpan[0].stops[0].calendarSpanState, "start");
+  assert.equal(sfSpan[1].stops[0].calendarSpanState, "middle");
+  assert.equal(sfSpan[6].stops[0].calendarSpanState, "end");
+});
+
 test("current and upcoming highlights come from the same normalized data", () => {
   const stops = normalizeRows(rawRows, { today: "2026-05-12" });
 
   assert.equal(getCurrentStop(stops)?.id, "2026-05-10-nyc-ny");
   assert.equal(getUpcomingStop(stops)?.id, "2026-06-01-cdmx");
+});
+
+test("month groups prioritize current and future months before past months", () => {
+  const stops = normalizeRows(rawRows, { today: "2026-05-12" });
+  const groups = groupStopsByMonth(stops, { prioritizeUpcoming: true });
+
+  assert.deepEqual(groups.map((group) => group.label), [
+    "May 2026",
+    "June 2026",
+    "July 2026",
+    "August 2026"
+  ]);
 });

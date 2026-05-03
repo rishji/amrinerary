@@ -155,21 +155,36 @@ function renderTimeline() {
     return;
   }
 
-  const groups = groupStopsByMonth(state.filteredStops);
-  elements.timelineView.innerHTML = groups
-    .map(
-      (group) => `
-        <section class="timeline-month">
-          <p class="timeline-month-label">${group.label}</p>
-          <div class="timeline-cards">
-            ${group.stops.map(renderTimelineCard).join("")}
-          </div>
-        </section>
-      `
-    )
-    .join("");
+  const groups = groupStopsByMonth(state.filteredStops, { prioritizeUpcoming: true });
+  const futureGroups = groups.filter((group) => !group.isPast);
+  const pastGroups = groups.filter((group) => group.isPast);
+
+  elements.timelineView.innerHTML = `
+    ${futureGroups.length ? futureGroups.map(renderTimelineMonth).join("") : `<div class="empty-state">No upcoming stops match this search.</div>`}
+    ${
+      pastGroups.length
+        ? `<details class="past-stops">
+            <summary>Past stops</summary>
+            <div class="past-stops-body">
+              ${pastGroups.map(renderTimelineMonth).join("")}
+            </div>
+          </details>`
+        : ""
+    }
+  `;
 
   bindCommentButtons(elements.timelineView);
+}
+
+function renderTimelineMonth(group) {
+  return `
+    <section class="timeline-month ${group.isPast ? "timeline-month-past" : ""}">
+      <p class="timeline-month-label">${group.label}</p>
+      <div class="timeline-cards">
+        ${group.stops.map(renderTimelineCard).join("")}
+      </div>
+    </section>
+  `;
 }
 
 function renderTimelineCard(stop) {
@@ -199,7 +214,7 @@ function renderCalendar() {
   elements.calendarView.innerHTML = months
     .map(
       (month) => `
-        <section class="calendar-month">
+        <section class="calendar-month ${month.isPast ? "calendar-month-past" : ""}">
           <p class="timeline-month-label">${month.label}</p>
           <div class="calendar-days">
             ${month.days.map(renderCalendarDay).join("")}
@@ -213,21 +228,26 @@ function renderCalendar() {
 }
 
 function renderCalendarDay(day) {
-  const stop = day.stops[0];
   return `
-    <article class="calendar-day ${stop ? "has-stop" : ""}">
+    <article class="calendar-day ${day.stops.length ? "has-stop" : ""}">
       <span class="calendar-day-label">${day.weekday}</span>
       <span class="calendar-day-number">${day.dayNumber}</span>
-      ${
-        stop
-          ? `<div class="calendar-stop">
-              <strong>${stop.location}</strong>
-              <p>${stop.dateLabel}</p>
-              <button class="comment-button" data-stop-id="${stop.id}" type="button">Comments</button>
-            </div>`
-          : ""
-      }
+      <div class="calendar-stops">${day.stops.map(renderCalendarStop).join("")}</div>
     </article>
+  `;
+}
+
+function renderCalendarStop(stop) {
+  const isDetailed = stop.calendarSpanState === "single" || stop.calendarSpanState === "start";
+  return `
+    <div class="calendar-stop calendar-stop-${stop.calendarSpanState}">
+      ${
+        isDetailed
+          ? `<strong>${stop.location}</strong><p>${stop.dateLabel}</p>`
+          : `<span>${stop.calendarSpanState === "end" ? `${stop.location} ends` : `${stop.location} continues`}</span>`
+      }
+      <button class="comment-button calendar-comment-button" data-stop-id="${stop.id}" type="button">Comments</button>
+    </div>
   `;
 }
 
