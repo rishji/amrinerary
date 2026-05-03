@@ -244,7 +244,7 @@ function renderCalendarStop(stop) {
       ${
         isDetailed
           ? `<strong>${stop.location}</strong><p>${stop.dateLabel}</p>`
-          : `<span>${stop.calendarSpanState === "end" ? `${stop.location} ends` : `${stop.location} continues`}</span>`
+          : `<span>${stop.calendarLabel}</span>`
       }
       <button class="comment-button calendar-comment-button" data-stop-id="${stop.id}" type="button">Comments</button>
     </div>

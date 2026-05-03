@@ -27,14 +27,14 @@ function buildSearchText(row) {
 
 function classifyStop(startDate, endDate, today) {
   if (endDate < today) {
-    return { isPast: true, isCurrent: false, isFuture: false };
+    return { isPast: true, isCurrent: false, isFuture: false, lifecycleStatus: "past" };
   }
 
   if (startDate > today) {
-    return { isPast: false, isCurrent: false, isFuture: true };
+    return { isPast: false, isCurrent: false, isFuture: true, lifecycleStatus: "planned" };
   }
 
-  return { isPast: false, isCurrent: true, isFuture: false };
+  return { isPast: false, isCurrent: true, isFuture: false, lifecycleStatus: "current" };
 }
 
 export function formatDateRange(startDate, endDate) {
@@ -67,7 +67,8 @@ export function normalizeRows(rows, options = {}) {
         notes: (row.notes ?? "").trim(),
         lat: row.lat === "" || row.lat == null ? null : Number(row.lat),
         lng: row.lng === "" || row.lng == null ? null : Number(row.lng),
-        status: (row.status ?? "").trim() || "planned",
+        rawStatus: (row.status ?? "").trim() || "planned",
+        status: classification.lifecycleStatus,
         searchText: buildSearchText(row),
         ...classification
       };
@@ -146,7 +147,8 @@ function buildMonthDays(month) {
       .filter((stop) => stop.startDateIso <= isoDate && stop.endDateIso >= isoDate)
       .map((stop) => ({
         ...stop,
-        calendarSpanState: getCalendarSpanState(stop, isoDate)
+        calendarSpanState: getCalendarSpanState(stop, isoDate),
+        calendarLabel: getCalendarLabel(stop, isoDate)
       }));
 
     return {
@@ -216,4 +218,13 @@ function getCalendarSpanState(stop, isoDate) {
   }
 
   return "middle";
+}
+
+function getCalendarLabel(stop, isoDate) {
+  const state = getCalendarSpanState(stop, isoDate);
+  if (state === "start" || state === "single") {
+    return stop.location;
+  }
+
+  return stop.location;
 }

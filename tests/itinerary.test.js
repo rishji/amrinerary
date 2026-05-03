@@ -83,11 +83,13 @@ test("normalizeRows sorts stops and parses status and coordinates", () => {
 
   assert.equal(stops.length, 5);
   assert.equal(stops[0].id, "2026-05-01-sf-ca");
-  assert.equal(stops[1].status, "planned");
+  assert.equal(stops[1].status, "current");
   assert.equal(stops[0].lat, 37.7749);
   assert.equal(stops[0].isCurrent, false);
+  assert.equal(stops[0].status, "past");
   assert.equal(stops[1].isCurrent, true);
   assert.equal(stops[4].isFuture, true);
+  assert.equal(stops[4].status, "planned");
 });
 
 test("shared filtering matches across location fields", () => {
@@ -133,6 +135,7 @@ test("calendar view spans a stop across every day in its range", () => {
   assert.equal(sfSpan[0].stops[0].calendarSpanState, "start");
   assert.equal(sfSpan[1].stops[0].calendarSpanState, "middle");
   assert.equal(sfSpan[6].stops[0].calendarSpanState, "end");
+  assert.equal(sfSpan[1].stops[0].calendarLabel, "SF");
 });
 
 test("current and upcoming highlights come from the same normalized data", () => {
