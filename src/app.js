@@ -13,7 +13,7 @@ const appConfig = {
     "https://docs.google.com/spreadsheets/d/1p6LYKwtvTj6tSq1ECNP-yfHx-jVgTk7DWRT1r7eTbuQ/export?format=csv&gid=510334876",
   sheetJsonUrl: "",
   fallbackDataUrl: "./sample-data.json",
-  commentBoxProjectId: ""
+  commentBoxProjectId: "5632126837850112-proj"
 };
 
 const state = {
