@@ -48,18 +48,17 @@ If you prefer JSON, you can point `sheetJsonUrl` at a pre-converted JSON endpoin
 
 CommentBox is loaded only when `commentBoxProjectId` is present. Each stop thread uses the stop `id` as its stable key.
 
-## Cloudflare Pages
+## GitHub Pages
 
-1. Push this directory to a git repo.
-2. In Cloudflare Pages, create a new project from that repo.
-3. Use the root directory as the project root.
-4. Leave build command blank.
-5. Leave output directory blank or set it to `/`.
-6. Deploy and keep the resulting `*.pages.dev` URL behind the existing short link.
+This site is published at:
+
+- https://rishji.github.io/amrinerary/
+
+For GitHub Pages, publish from this repository using the root directory as the site source. No build command is required.
 
 Reference docs:
 
-- https://developers.cloudflare.com/pages/
+- https://docs.github.com/en/pages
 - https://commentbox.io/docs/
 
 ## TDD workflow
