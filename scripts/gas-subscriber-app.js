@@ -6,7 +6,7 @@
 //   1. Open Amrit's Google Sheet → Extensions → Apps Script
 //   2. Paste this entire file, replacing any existing code
 //   3. Click "Deploy" → "New deployment" → type "Web app"
-//      • Execute as: Me (umrittheer@gmail.com)
+//      • Execute as: Me (amritdhir@gmail.com)
 //      • Who has access: Anyone
 //   4. Click "Deploy" and copy the Web App URL
 //   5. Paste that URL into appConfig.gasEndpointUrl in src/app.js
