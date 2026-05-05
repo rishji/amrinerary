@@ -17,6 +17,19 @@
     <link rel="stylesheet" href="./styles.css" />
   </head>
   <body>
+    <div id="notify-banner" class="notify-banner hidden" role="banner" aria-label="City visit notification sign-up">
+      <div class="notify-banner-inner">
+        <p class="notify-banner-text">Get notified when Amrit visits your city</p>
+        <form id="notify-form" class="notify-form" novalidate>
+          <input id="notify-email" class="notify-input" type="email" placeholder="your@email.com" autocomplete="email" required />
+          <select id="notify-city" class="notify-select" required>
+            <option value="">Select your city&hellip;</option>
+          </select>
+          <button class="notify-submit" type="submit">Notify me</button>
+        </form>
+        <p id="notify-success" class="notify-success hidden">You&rsquo;re on the list!</p>
+      </div>
+    </div>
     <div class="page-shell">
       <header class="hero">
         <p class="eyebrow">Editorial travel log</p>

@@ -13,7 +13,9 @@ const appConfig = {
     "https://docs.google.com/spreadsheets/d/1p6LYKwtvTj6tSq1ECNP-yfHx-jVgTk7DWRT1r7eTbuQ/export?format=csv&gid=510334876",
   sheetJsonUrl: "",
   fallbackDataUrl: "./sample-data.json",
-  commentBoxProjectId: "5632126837850112-proj"
+  commentBoxProjectId: "5632126837850112-proj",
+  // Paste Amrit's deployed Google Apps Script Web App URL here after he sets it up.
+  gasEndpointUrl: ""
 };
 
 const state = {
@@ -36,6 +38,11 @@ const elements = {
   dialogSubtitle: document.querySelector("#dialog-subtitle"),
   dialogTitle: document.querySelector("#dialog-title"),
   mapEmpty: document.querySelector("#map-empty"),
+  notifyBanner: document.querySelector("#notify-banner"),
+  notifyCity: document.querySelector("#notify-city"),
+  notifyEmail: document.querySelector("#notify-email"),
+  notifyForm: document.querySelector("#notify-form"),
+  notifySuccess: document.querySelector("#notify-success"),
   resultsSummary: document.querySelector("#results-summary"),
   searchInput: document.querySelector("#search-input"),
   timelineView: document.querySelector("#timeline-view"),
@@ -59,6 +66,7 @@ async function bootstrap() {
   state.allStops = normalizeRows(rows, { today: appConfig.today });
   state.filteredStops = state.allStops;
   render();
+  initNotifyBanner();
 }
 
 async function loadRows() {
@@ -376,6 +384,82 @@ function renderCommentThread(stopId, containerClass) {
     defaultBoxId: stopId,
     tlcParam: `thread-${stopId}`
   });
+}
+
+function initNotifyBanner() {
+  if (!appConfig.gasEndpointUrl) return;
+  if (localStorage.getItem("amrinerary_notify_signed_up")) return;
+
+  populateCityDropdown();
+
+  elements.notifyBanner.classList.remove("hidden");
+  const height = elements.notifyBanner.offsetHeight;
+  document.body.style.paddingTop = `${height}px`;
+
+  elements.notifyForm.addEventListener("submit", handleNotifySubmit);
+}
+
+function populateCityDropdown() {
+  const cityData = new Map();
+
+  for (const stop of state.allStops) {
+    if (!stop.city) continue;
+    if (!cityData.has(stop.city)) {
+      cityData.set(stop.city, { count: 0, nextDate: null });
+    }
+    const entry = cityData.get(stop.city);
+    entry.count++;
+    if (!stop.isPast && (!entry.nextDate || stop.startDateIso < entry.nextDate)) {
+      entry.nextDate = stop.startDateIso;
+    }
+  }
+
+  const sorted = [...cityData.entries()]
+    .map(([city, data]) => ({ city, ...data }))
+    .sort((a, b) => {
+      if (a.nextDate && b.nextDate) return a.nextDate.localeCompare(b.nextDate);
+      if (a.nextDate) return -1;
+      if (b.nextDate) return 1;
+      return b.count - a.count;
+    });
+
+  for (const { city } of sorted) {
+    const option = document.createElement("option");
+    option.value = city;
+    option.textContent = city;
+    elements.notifyCity.append(option);
+  }
+}
+
+async function handleNotifySubmit(event) {
+  event.preventDefault();
+
+  const email = elements.notifyEmail.value.trim();
+  const city = elements.notifyCity.value;
+  if (!email || !city) return;
+
+  const submitButton = elements.notifyForm.querySelector(".notify-submit");
+  submitButton.disabled = true;
+  submitButton.textContent = "Signing up…";
+
+  try {
+    await fetch(appConfig.gasEndpointUrl, {
+      method: "POST",
+      mode: "no-cors",
+      body: new URLSearchParams({ email, city })
+    });
+  } catch {
+    // no-cors fetch resolves even on network error; log silently
+  }
+
+  localStorage.setItem("amrinerary_notify_signed_up", "1");
+  elements.notifyForm.classList.add("hidden");
+  elements.notifySuccess.classList.remove("hidden");
+
+  setTimeout(() => {
+    elements.notifyBanner.classList.add("hidden");
+    document.body.style.paddingTop = "";
+  }, 2200);
 }
 
 function parseCsv(text) {
