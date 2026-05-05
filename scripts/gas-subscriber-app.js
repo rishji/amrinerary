@@ -23,6 +23,7 @@ const NOTIFY_DAYS_AHEAD = 5;
 
 function doPost(e) {
   try {
+    const name  = ((e.parameter && e.parameter.name)  || "").trim();
     const email = ((e.parameter && e.parameter.email) || "").trim().toLowerCase();
     const city  = ((e.parameter && e.parameter.city)  || "").trim();
 
@@ -50,7 +51,8 @@ function doPost(e) {
       city,                     // city
       new Date().toISOString(), // subscribed_at
       Utilities.getUuid(),      // unsubscribe_token
-      true                      // active
+      true,                     // active
+      name                      // name
     ]);
 
     return jsonOut({ ok: true });
@@ -144,15 +146,16 @@ function sendNotifications() {
       .forEach(function(sub) {
         var subEmail   = sub[1];
         var unsubToken = sub[4];
+        var subName    = (sub[6] || "").trim();
         var unsubLink  = webAppUrl + "?action=unsubscribe&token=" + unsubToken;
 
         try {
           GmailApp.sendEmail(
             subEmail,
             "Amrit is coming to " + city + " in 5 days!",
-            plainTextBody(city, dateRange, notes, unsubLink),
+            plainTextBody(subName, city, dateRange, notes, unsubLink),
             {
-              htmlBody: htmlEmailBody(city, dateRange, notes, unsubLink),
+              htmlBody: htmlEmailBody(subName, city, dateRange, notes, unsubLink),
               name: "Amrit Dheer"
             }
           );
@@ -190,7 +193,7 @@ function getOrCreateSubscriberSheet() {
   var sheet = ss.getSheetByName(SUBSCRIBER_TAB);
   if (!sheet) {
     sheet = ss.insertSheet(SUBSCRIBER_TAB);
-    sheet.appendRow(["id", "email", "city", "subscribed_at", "unsubscribe_token", "active"]);
+    sheet.appendRow(["id", "email", "city", "subscribed_at", "unsubscribe_token", "active", "name"]);
     sheet.setFrozenRows(1);
   }
   return sheet;
@@ -208,25 +211,26 @@ function formatDate(dateStr) {
   return months[parts[1] - 1] + " " + parts[2] + ", " + parts[0];
 }
 
-function plainTextBody(city, dateRange, notes, unsubLink) {
+function plainTextBody(name, city, dateRange, notes, unsubLink) {
   return [
-    "Hey there,",
+    "Hey " + (name || "there") + ",",
     "",
-    "Just a heads up — I'll be in " + city + " in just five days (" + dateRange + "), and I'd love to catch up if you're around!",
+    "I'll be in " + city + " in just five days (" + dateRange + "), and I'd love to catch up if you're around!",
     notes ? "\n" + notes : "",
     "",
-    "Drop me a line if you want to grab coffee, a meal, or just hang — it would be genuinely great to see you.",
+    "Drop me a line if you want to go for a walk, a meal, or just hang — it would be genuinely great to see you.",
     "",
     "Looking forward to it,",
     "Amrit",
     "",
     "—",
-    "You signed up for city visit notifications on Amrinerary.",
+    "You signed up for city visit notifications on Amrinerary (https://amrinerary.pages.dev).",
     "Unsubscribe: " + unsubLink
   ].join("\n");
 }
 
-function htmlEmailBody(city, dateRange, notes, unsubLink) {
+function htmlEmailBody(name, city, dateRange, notes, unsubLink) {
+  var greeting   = "Hey " + (name || "there") + ",";
   var notesBlock = notes
     ? "<p style=\"margin:0 0 16px;font-size:1rem;line-height:1.7;color:#5f6882;" +
       "padding:16px;background:#fff8f0;border-radius:12px;border-left:3px solid #ffb703\">" +
@@ -242,20 +246,21 @@ function htmlEmailBody(city, dateRange, notes, unsubLink) {
     "font-size:0.75rem;letter-spacing:0.1em;text-transform:uppercase;color:#ff5b6e\">Travel notice</p>" +
     "<h1 style=\"margin:0 0 24px;font-size:1.9rem;color:#172033;line-height:1.2\">" +
     "I'll be in " + city + " soon!</h1>" +
-    "<p style=\"margin:0 0 16px;font-size:1.05rem;line-height:1.75;color:#2c2c2c\">Hey there,</p>" +
+    "<p style=\"margin:0 0 16px;font-size:1.05rem;line-height:1.75;color:#2c2c2c\">" + greeting + "</p>" +
     "<p style=\"margin:0 0 16px;font-size:1.05rem;line-height:1.75;color:#2c2c2c\">" +
-    "Just a heads up — I'll be in <strong>" + city + "</strong> in just five days (" + dateRange + "), " +
+    "I'll be in <strong>" + city + "</strong> in just five days (" + dateRange + "), " +
     "and I'd love to catch up if you're around!</p>" +
     notesBlock +
     "<p style=\"margin:0 0 24px;font-size:1.05rem;line-height:1.75;color:#2c2c2c\">" +
-    "Drop me a line if you want to grab coffee, a meal, or just hang — " +
+    "Drop me a line if you want to go for a walk, a meal, or just hang — " +
     "it would be genuinely great to see you.</p>" +
     "<p style=\"margin:0 0 32px;font-size:1.05rem;line-height:1.75;color:#2c2c2c\">" +
     "Looking forward to it,<br><strong>Amrit</strong></p>" +
     "<div style=\"border-top:1px solid rgba(23,32,51,0.1);padding-top:24px\">" +
     "<p style=\"margin:0;font-family:'Helvetica Neue',Arial,sans-serif;" +
     "font-size:0.78rem;color:#9aa3b5;line-height:1.6\">" +
-    "You signed up to receive notifications when Amrit visits your city via Amrinerary.<br>" +
+    "You signed up to receive notifications when Amrit visits your city via " +
+    "<a href=\"https://amrinerary.pages.dev\" style=\"color:#9aa3b5\">Amrinerary</a>.<br>" +
     "<a href=\"" + unsubLink + "\" style=\"color:#9aa3b5\">Unsubscribe</a></p>" +
     "</div></div></div></body></html>";
 }

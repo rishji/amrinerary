@@ -42,6 +42,7 @@ const elements = {
   notifyCity: document.querySelector("#notify-city"),
   notifyEmail: document.querySelector("#notify-email"),
   notifyForm: document.querySelector("#notify-form"),
+  notifyName: document.querySelector("#notify-name"),
   notifySuccess: document.querySelector("#notify-success"),
   resultsSummary: document.querySelector("#results-summary"),
   searchInput: document.querySelector("#search-input"),
@@ -434,6 +435,7 @@ function populateCityDropdown() {
 async function handleNotifySubmit(event) {
   event.preventDefault();
 
+  const name = elements.notifyName.value.trim();
   const email = elements.notifyEmail.value.trim();
   const city = elements.notifyCity.value;
   if (!email || !city) return;
@@ -446,7 +448,7 @@ async function handleNotifySubmit(event) {
     await fetch(appConfig.gasEndpointUrl, {
       method: "POST",
       mode: "no-cors",
-      body: new URLSearchParams({ email, city })
+      body: new URLSearchParams({ name, email, city })
     });
   } catch {
     // no-cors fetch resolves even on network error; log silently
