@@ -2,7 +2,7 @@
 
 ## Architecture Overview
 
-Since the site is a 100% static frontend on Cloudflare Pages, we need two external pieces:
+Since the site is a 100% static frontend on GitHub Pages, we need two external pieces:
 
 1. **Google Apps Script Web App** — Amrit deploys this from his subscriber Google Sheet. It acts as a tiny backend that (a) accepts sign-up form submissions and writes them to the sheet, and (b) serves subscriber data securely to GitHub Actions using a shared secret token.
 

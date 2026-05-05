@@ -257,7 +257,7 @@ Here's what now happens automatically, every day, forever:
 2. It looks for any city where your `start_date` is exactly **5 days from today**
 3. For each match, it finds everyone who signed up for that city
 4. It sends them an email from **amritdhir@gmail.com** saying you're arriving soon and you'd love to meet up
-5. Each email has a personal-looking "Hey there…" message and an unsubscribe link at the bottom
+5. Each email has a personal-looking "Hey friend…" message and an unsubscribe link at the bottom
 
 You never have to touch it again. Just keep your Google Sheet itinerary up to date.
 
